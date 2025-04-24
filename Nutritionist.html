@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrióloga [Nombre Apellido] - Nutrición Profesional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #64B58A; /* Verde claro juvenil */
+            --primary-green-dark: #4a9b71;
+            --text-dark: #343A40;
+            --text-light: #FFFFFF;
+            --bg-light: #F8F9FA;
+            --bg-white: #FFFFFF;
+            --border-color: #DEE2E6;
+            --gray-light: #CED4DA;
+            --gray-medium: #6C757D;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e9ecef; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-green); border-radius: 4px;}
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-green-dark); }
+
+        /* Header */
+        .header { background-color: var(--bg-white); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .nav-link { padding: 8px 12px; border-radius: 6px; transition: background-color 0.2s ease, color 0.2s ease; }
+        .nav-link:hover { background-color: #eef7f2; color: var(--primary-green-dark); }
+        .nav-link.active { background-color: var(--primary-green); color: var(--text-light); }
+        .flag-icon { width: 20px; height: auto; margin-left: 5px; vertical-align: middle; border: 1px solid #ccc; }
+
+        /* Hero */
+        .hero { background: linear-gradient(to right, rgba(255,255,255,0.8), rgba(255,255,255,0.9)), url('https://images.pexels.com/photos/1153369/pexels-photo-1153369.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1') no-repeat center center; background-size: cover; }
+
+        /* Testimonials Carousel */
+        .testimonial-carousel { position: relative; overflow: hidden; }
+        .testimonial-slide {
+            flex: 0 0 100%; /* Full width slide */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute; /* Overlay slides */
+            top: 0; left: 0; right: 0; bottom: 0;
+        }
+        .testimonial-slide.active { opacity: 1; position: relative; /* Make active slide take space */ }
+        .testimonial-nav button {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border-color);
+            color: var(--primary-green);
+            width: 35px; height: 35px; border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        .testimonial-nav button:hover { background-color: white; }
+
+        /* Footer */
+        .footer { background-color: var(--text-dark); color: var(--gray-light); }
+        .footer a { color: var(--text-light); transition: color 0.2s ease; }
+        .footer a:hover { color: var(--primary-green); }
+        .footer .fab, .footer .payment-icon { font-size: 1.6rem; margin: 0 0.6rem; vertical-align: middle; }
+        .footer .fab.fa-cc-visa { color: #1a1f71; }
+        .footer .fab.fa-cc-mastercard { color: #eb001b; }
+        .footer .fab.fa-cc-discover { color: #ff6600; }
+        .footer .payment-icon.mercado-pago {
+            font-size: 1.2rem; font-weight: bold; color: #009ee3; border: 1px solid #009ee3;
+            padding: 2px 5px; border-radius: 3px; display: inline-block; line-height: 1; background-color: white;
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.6);
+            display: flex; align-items: center; justify-content: center; z-index: 50;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; transition: opacity 0.3s ease; }
+        .modal-content {
+            background-color: var(--bg-white); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 90%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column;
+            transform: scale(0.95); transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-header { border-bottom: 1px solid var(--border-color); padding: 1rem 1.5rem; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+        .modal-footer { border-top: 1px solid var(--border-color); padding: 1rem 1.5rem; text-align: right; }
+        .modal-close-btn { background: none; border: none; font-size: 1.5rem; color: var(--gray-medium); cursor: pointer; }
+        .modal-close-btn:hover { color: var(--text-dark); }
+
+        /* Input field basic style */
+        .input-field {
+            width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: 6px;
+            font-size: 0.95rem; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-field:focus {
+            outline: none; border-color: var(--primary-green); box-shadow: 0 0 0 2px rgba(100, 181, 138, 0.3);
+        }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; }
+        .btn-primary {
+             background-color: var(--primary-green); color: white; padding: 0.75rem 1.5rem; border-radius: 6px;
+             font-weight: 500; transition: background-color 0.2s ease;
+        }
+        .btn-primary:hover { background-color: var(--primary-green-dark); }
+        .btn-secondary {
+             background-color: var(--gray-light); color: var(--text-dark); padding: 0.75rem 1.5rem; border-radius: 6px;
+             font-weight: 500; transition: background-color 0.2s ease;
+        }
+        .btn-secondary:hover { background-color: #adb5bd; }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="flex flex-col min-h-screen">
+
+        <header class="header sticky top-0 z-40 w-full px-6 py-3">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="text-xl font-semibold text-[var(--primary-green)]">
+                    Nutrióloga [Nombre]
+                </div>
+
+                <nav class="hidden md:flex items-center space-x-2">
+                    <a href="#inicio" @click.prevent="scrollToSection('inicio')" class="nav-link">Inicio</a>
+                    <button @click="openSection('services')" class="nav-link">Servicios</button>
+                    <button @click="openSection('testimonials')" class="nav-link">Testimonios</button>
+                    <button @click="openSection('location')" class="nav-link">Ubícanos</button>
+                    <button @click="openSection('contact')" class="nav-link">Contacto</button>
+                    <button @click="openSection('schedule')" class="bg-[var(--primary-green)] text-white font-medium py-2 px-4 rounded-full hover:bg-[var(--primary-green-dark)] transition-colors text-sm">Agendar Cita</button>
+                    <img src="https://flagcdn.com/w40/mx.png" alt="Bandera de México" class="flag-icon">
+                </nav>
+                 <div class="md:hidden">
+                     <button class="text-gray-600 text-2xl">☰</button>
+                 </div>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            <section id="inicio" class="hero py-16 md:py-24 px-6 text-center md:text-left">
+                <div class="container mx-auto md:flex items-center gap-8">
+                    <div class="md:w-1/2 mb-8 md:mb-0">
+                        <h1 class="text-3xl md:text-5xl font-bold text-[var(--text-dark)] mb-4 leading-tight">Transforma tu Salud con Nutrición Personalizada</h1>
+                        <p class="text-lg text-gray-700 mb-6">Alcanza tus objetivos de bienestar con planes de alimentación diseñados especialmente para ti. ¡Empieza hoy tu camino hacia una vida más saludable!</p>
+                        <button @click="openSection('schedule')" class="btn-primary px-8 py-3 text-lg">Agendar mi Cita</button>
+                    </div>
+                     <div class="md:w-1/2 flex justify-center">
+                         <img src="https://placehold.co/400x400/E8F5E9/64B58A?text=Nutri%C3%B3loga" alt="Foto de la Nutrióloga" class="rounded-full shadow-lg w-64 h-64 md:w-80 md:h-80 object-cover border-4 border-white">
+                     </div>
+                </div>
+            </section>
+
+            <section class="py-12 px-6 bg-white">
+                 <div class="container mx-auto text-center">
+                     <h2 class="text-2xl md:text-3xl font-semibold mb-8">Nuestros Servicios Principales</h2>
+                     <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+                         <div class="p-6 border border-[var(--border-color)] rounded-lg shadow-sm">
+                             <h3 class="text-xl font-semibold text-[var(--primary-green)] mb-2">Consulta InBody</h3>
+                             <p class="text-sm text-[var(--gray-medium)]">Análisis detallado de tu composición corporal para un plan preciso.</p>
+                         </div>
+                         <div class="p-6 border border-[var(--border-color)] rounded-lg shadow-sm">
+                             <h3 class="text-xl font-semibold text-[var(--primary-green)] mb-2">Seguimiento Personalizado</h3>
+                             <p class="text-sm text-[var(--gray-medium)]">Acompañamiento continuo para asegurar que alcances tus metas.</p>
+                         </div>
+                     </div>
+                      <button @click="openSection('services')" class="mt-8 text-[var(--primary-green)] hover:text-[var(--primary-green-dark)] font-medium">Ver todos los servicios →</button>
+                 </div>
+            </section>
+
+             <section class="py-12 px-6">
+                 <div class="container mx-auto text-center">
+                     <h2 class="text-2xl md:text-3xl font-semibold mb-8">Lo que dicen nuestros pacientes</h2>
+                     <div class="max-w-2xl mx-auto italic text-gray-700">
+                         <p>"Gracias al plan personalizado, logré mis objetivos de peso y aprendí a comer saludable. ¡Totalmente recomendado!"</p>
+                         <p class="font-semibold mt-2">- Paciente Satisfecho</p>
+                     </div>
+                     <button @click="openSection('testimonials')" class="mt-8 text-[var(--primary-green)] hover:text-[var(--primary-green-dark)] font-medium">Leer más testimonios →</button>
+                 </div>
+            </section>
+
+
+        </main>
+
+        <footer class="footer p-8 mt-16">
+            <div class="container mx-auto text-center">
+                <div class="mb-5">
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-square"></i></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram-square"></i></a>
+                    <a href="#" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp-square"></i></a>
+                </div>
+                <div class="mb-5 text-sm">
+                    <span>Aceptamos: </span>
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-discover"></i>
+                    <span class="payment-icon mercado-pago">Mercado Pago</span>
+                </div>
+                <div class="text-xs mb-2">
+                    Nutrióloga [Nombre Apellido] © {{ new Date().getFullYear() }} - Aguascalientes, México
+                </div>
+                <div class="text-xs text-gray-400">
+                    Diseño Web Conceptual por IA
+                </div>
+            </div>
+        </footer>
+
+
+        <transition name="fade">
+            <div v-if="activeSection" class="modal-overlay visible" @click.self="closeSection">
+                <transition name="scale">
+                    <div v-if="activeSection" class="modal-content">
+                        <div class="modal-header flex justify-between items-center">
+                            <h3 class="text-xl font-semibold text-[var(--primary-green)]">{{ modalTitle }}</h3>
+                            <button @click="closeSection" class="modal-close-btn" aria-label="Cerrar">×</button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div v-if="activeSection === 'services'">
+                                <ul class="space-y-4">
+                                    <li v-for="service in services" :key="service.id">
+                                        <h4 class="font-semibold text-lg mb-1">{{ service.name }}</h4>
+                                        <p class="text-sm text-[var(--gray-medium)]">{{ service.description }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div v-if="activeSection === 'testimonials'" class="testimonial-carousel">
+                                 <div v-for="(testimonial, index) in testimonials" :key="testimonial.id"
+                                      :class="['testimonial-slide', { 'active': index === currentTestimonialIndex }]">
+                                     <blockquote class="text-center p-4">
+                                         <p class="italic text-gray-700 mb-4">"{{ testimonial.quote }}"</p>
+                                         <footer class="font-semibold text-sm text-[var(--primary-green)]">- {{ testimonial.author }}</footer>
+                                     </blockquote>
+                                 </div>
+                                 <div class="testimonial-nav absolute bottom-4 left-0 right-0 flex justify-center gap-4">
+                                     <button @click="prevTestimonial" aria-label="Anterior Testimonio">←</button>
+                                     <button @click="nextTestimonial" aria-label="Siguiente Testimonio">→</button>
+                                 </div>
+                             </div>
+
+
+                            <div v-if="activeSection === 'location'" class="space-y-4">
+                                <p>Visítanos en nuestra conveniente ubicación en Aguascalientes.</p>
+                                <p class="font-medium">Dirección: [Tu Dirección Completa Aquí], Col. [Colonia], Aguascalientes, Ags.</p>
+                                <div class="aspect-w-16 aspect-h-9 border border-[var(--border-color)] rounded overflow-hidden">
+                                     <iframe
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d118484.0122976844!2d-102.36600164335938!3d21.858043100000004!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8429ee1c8b595183%3A0x638ef44f1467507e!2sAguascalientes%2C%20Ags.!5e0!3m2!1ses-419!2smx!4v1713924012345!5m2!1ses-419!2smx"
+                                        width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade" title="Mapa de Ubicación"></iframe>
+                                </div>
+                            </div>
+
+                            <div v-if="activeSection === 'contact'">
+                                <p class="mb-4">Puedes contactarnos a través de los siguientes medios:</p>
+                                <ul class="space-y-2 list-disc list-inside text-sm">
+                                    <li><strong class="font-medium">Teléfono/WhatsApp:</strong> <a href="tel:+52XXXXXXXXXX" class="text-blue-600 hover:underline">[Tu Número]</a></li>
+                                    <li><strong class="font-medium">Email:</strong> <a href="mailto:tuemail@ejemplo.com" class="text-blue-600 hover:underline">[Tu Email]</a></li>
+                                    <li><strong class="font-medium">Redes Sociales:</strong> Encuéntranos en Facebook e Instagram (ver iconos en pie de página).</li>
+                                </ul>
+                                <p class="mt-6 text-xs text-gray-500">O visita la sección "Agendar Cita" para reservar directamente.</p>
+                            </div>
+
+                            <div v-if="activeSection === 'schedule'">
+                                <p class="mb-4">Agenda tu cita fácilmente. Simula un inicio de sesión y te generaremos un enlace para añadir a tu Google Calendar.</p>
+                                <form @submit.prevent="generateCalendarLink" class="space-y-4">
+                                    <div>
+                                        <label for="sched-name" class="form-label">Nombre:</label>
+                                        <input type="text" id="sched-name" v-model="scheduleForm.name" required class="input-field" placeholder="Tu nombre completo">
+                                    </div>
+                                    <div>
+                                        <label for="sched-email" class="form-label">Email (Gmail/Otro):</label>
+                                        <input type="email" id="sched-email" v-model="scheduleForm.email" required class="input-field" placeholder="tu.email@ejemplo.com">
+                                    </div>
+                                    <button type="submit" class="btn-primary w-full">Generar Enlace de Calendario</button>
+                                </form>
+                                <div v-if="calendarLink" class="mt-6 p-4 bg-green-50 border border-green-200 rounded text-center">
+                                    <p class="text-sm text-green-800 mb-2">¡Enlace generado! Haz clic para añadir un evento (simulado) a tu Google Calendar:</p>
+                                    <a :href="calendarLink" target="_blank" rel="noopener noreferrer" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded text-sm">
+                                        <i class="far fa-calendar-alt mr-1"></i> Añadir a Google Calendar
+                                    </a>
+                                    <p class="text-xs text-gray-500 mt-3">(Esto es una simulación, no crea una cita real en nuestro sistema).</p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                         <div class="modal-footer">
+                             <button @click="closeSection" class="btn-secondary">Cerrar</button>
+                         </div>
+                    </div>
+                 </transition>
+            </div>
+        </transition>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                // --- Reactive State ---
+                const activeSection = ref(null); // null, 'services', 'testimonials', 'location', 'contact', 'schedule'
+                const currentTestimonialIndex = ref(0);
+                const scheduleForm = ref({ name: '', email: '' });
+                const calendarLink = ref('');
+
+                // --- Static Data ---
+                const services = ref([
+                    { id: 1, name: 'Consulta Nutricional Inicial + InBody', description: 'Evaluación completa de hábitos, historial clínico y análisis de composición corporal (InBody) para establecer objetivos y un plan inicial.' },
+                    { id: 2, name: 'Plan de Alimentación Personalizado', description: 'Diseño de un menú semanal adaptado a tus necesidades, gustos, horarios y objetivos (pérdida de peso, aumento muscular, salud, etc.).' },
+                    { id: 3, name: 'Seguimiento Personalizado (Presencial/Online)', description: 'Consultas periódicas para evaluar progreso, ajustar el plan, resolver dudas y mantener la motivación.' },
+                    { id: 4, name: 'Nutrición Deportiva', description: 'Planes específicos para optimizar el rendimiento, la recuperación y la composición corporal en atletas y personas activas.' },
+                    { id: 5, name: 'Nutrición Clínica', description: 'Manejo nutricional de condiciones específicas como diabetes, hipertensión, colesterol alto, alergias, etc.' },
+                    { id: 6, name: 'Talleres y Educación Nutricional', description: 'Charlas y talleres grupales sobre temas de alimentación saludable, lectura de etiquetas, cocina saludable, etc.' },
+                ]);
+
+                const testimonials = ref([
+                    { id: 1, quote: '¡Increíble cambio! No solo bajé de peso, sino que aprendí a comer delicioso y saludable. La atención personalizada marcó la diferencia.', author: 'Ana G.' },
+                    { id: 2, quote: 'Tenía problemas digestivos constantes. Con el plan adecuado, mi calidad de vida mejoró muchísimo. ¡Muy profesional y empática!', author: 'Carlos R.' },
+                    { id: 3, quote: 'Como deportista, necesitaba optimizar mi alimentación. Los resultados en mi rendimiento han sido notables. ¡Gracias!', author: 'Sofía M.' },
+                    { id: 4, quote: 'Logré controlar mis niveles de azúcar y me siento con más energía que nunca. El seguimiento constante fue clave.', author: 'Javier L.' },
+                ]);
+
+                // --- Computed Properties ---
+                const modalTitle = computed(() => {
+                    switch (activeSection.value) {
+                        case 'services': return 'Nuestros Servicios';
+                        case 'testimonials': return 'Testimonios';
+                        case 'location': return 'Ubícanos';
+                        case 'contact': return 'Contáctanos';
+                        case 'schedule': return 'Agendar Cita';
+                        default: return '';
+                    }
+                });
+
+                // --- Methods ---
+                const openSection = (section) => {
+                    activeSection.value = section;
+                    calendarLink.value = ''; // Reset calendar link when opening any modal
+                    scheduleForm.value = { name: '', email: '' }; // Reset form
+                    document.body.style.overflow = 'hidden';
+                };
+
+                const closeSection = () => {
+                    activeSection.value = null;
+                    document.body.style.overflow = '';
+                };
+
+                 // Testimonial Carousel Logic
+                const nextTestimonial = () => {
+                    currentTestimonialIndex.value = (currentTestimonialIndex.value + 1) % testimonials.value.length;
+                };
+                const prevTestimonial = () => {
+                    currentTestimonialIndex.value = (currentTestimonialIndex.value - 1 + testimonials.value.length) % testimonials.value.length;
+                };
+
+                // Generate Google Calendar Link (Simulation)
+                const generateCalendarLink = () => {
+                    const name = encodeURIComponent(scheduleForm.value.name);
+                    const email = encodeURIComponent(scheduleForm.value.email);
+                    // Placeholder date/time - ideally, this would come from a date picker
+                    const startDate = new Date(); // Use today for simplicity
+                    startDate.setDate(startDate.getDate() + 2); // Set 2 days from now
+                    startDate.setHours(10, 0, 0, 0); // At 10:00 AM
+                    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
+
+                    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ)
+                    const formatDate = (date) => date.toISOString().replace(/-|:|\.\d{3}/g, '');
+                    const startTime = formatDate(startDate);
+                    const endTime = formatDate(endDate);
+
+                    const title = encodeURIComponent(`Cita Nutrición - ${name}`);
+                    const details = encodeURIComponent(`Cita agendada por ${name} (${email}).\nRecordatorio: Esta es una simulación.`);
+                    const location = encodeURIComponent('[Dirección de la Clínica], Aguascalientes'); // Replace with actual address
+
+                    // Construct the Google Calendar link
+                    calendarLink.value = `https://www.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startTime}/${endTime}&details=${details}&location=${location}`;
+
+                    console.log("Generated Calendar Link:", calendarLink.value);
+                };
+
+                // Smooth scroll for internal links (optional)
+                const scrollToSection = (id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                };
+
+
+                // --- Expose to Template ---
+                return {
+                    activeSection,
+                    modalTitle,
+                    services,
+                    testimonials,
+                    currentTestimonialIndex,
+                    scheduleForm,
+                    calendarLink,
+                    openSection,
+                    closeSection,
+                    nextTestimonial,
+                    prevTestimonial,
+                    generateCalendarLink,
+                    scrollToSection
+                };
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+</html>
